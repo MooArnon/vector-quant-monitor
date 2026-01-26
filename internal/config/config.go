@@ -15,6 +15,13 @@ import (
 type AppConfig struct {
 	Database DatabaseConfig
 	Worker   WorkerConfig
+	Binance  BinanceMarketConfig
+}
+
+type BinanceMarketConfig struct {
+	ApiKey    string
+	ApiSecret string
+	Leverage  int
 }
 
 type AwsSecretData struct {
@@ -47,6 +54,14 @@ func LoadConfig() *AppConfig {
 			DBPassword: getEnv("DB_PASSWORD", ""), // Will be overwritten
 			DBName:     getEnv("DB_NAME", ""),
 		},
+		Worker: WorkerConfig{
+			HostMetricIntervalSeconds: getEnvAsInt("WORKER_HOST_METRIC_INTERVAL_SECONDS", 10),
+		},
+		Binance: BinanceMarketConfig{
+			ApiKey:    getEnv("BINANCE_API_KEY", ""),    // Will be overwritten
+			ApiSecret: getEnv("BINANCE_SECRET_KEY", ""), // Will be overwritten
+			Leverage:  getEnvAsInt("LEVERAGE", 20),
+		},
 	}
 
 	// 2. Fetch Secrets from AWS to overwrite sensitive fields
@@ -60,6 +75,12 @@ func LoadConfig() *AppConfig {
 		}
 		if secrets.TRADING_BOT_DB_POSTGRESQL_PASSWORD != "" {
 			cfg.Database.DBPassword = secrets.TRADING_BOT_DB_POSTGRESQL_PASSWORD
+		}
+		if secrets.BinanceApiKey != "" {
+			cfg.Binance.ApiKey = secrets.BinanceApiKey
+		}
+		if secrets.BinanceApiSecret != "" {
+			cfg.Binance.ApiSecret = secrets.BinanceApiSecret
 		}
 	} else {
 		log.Println("Warning: AWS_SECRET_NAME not set. Using environment variables only.")

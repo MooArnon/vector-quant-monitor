@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"log/slog"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -31,5 +32,42 @@ func (p *Postgresql) InsertHostMetrics(db *sql.DB, cpuPercent float64, ramPercen
 		VALUES (current_timestamp, 'ec2-host', $1, $2, $3)
 	`
 	_, err := p.DB.Exec(query, cpuPercent, ramPercent, diskPercent)
+	return err
+}
+
+func (p *Postgresql) InsertPositionHistory(
+	db *sql.DB,
+	symbol string,
+	side string,
+	positionSide string,
+	netPnl float64,
+	vol float64,
+	openTime time.Time,
+	closeTime time.Time,
+) error {
+	query := `
+		INSERT INTO trading.position_history (
+			recorded_at
+			, market
+			, symbol
+			, side
+			, net_pnl
+			, volume
+			, open_timestamp
+			, close_timestamp
+		)
+		VALUES (
+			current_timestamp
+			, 0
+			, $1
+			, $2
+			, $3
+			, $4
+			, $5
+			, $6
+		)
+		ON CONFLICT (open_timestamp, symbol) DO NOTHING
+	`
+	_, err := p.DB.Exec(query, symbol, side, netPnl, vol, openTime, closeTime)
 	return err
 }
