@@ -205,7 +205,7 @@ func groupTradesByOrder(trades []Trade) []*OrderGroup {
 	return result
 }
 
-func fetchTradesWithTimeWindow(symbol string, daysBack int) ([]Trade, error) {
+func fetchTradesWithTimeWindow(symbol string, hoursBack int) ([]Trade, error) {
 	config := config.LoadConfig()
 	ApiKey := config.Binance.ApiKey
 	SecretKey := config.Binance.ApiSecret
@@ -216,7 +216,7 @@ func fetchTradesWithTimeWindow(symbol string, daysBack int) ([]Trade, error) {
 	// 1. Calculate the final end time (Now)
 	endTime := time.Now().UnixMilli()
 	// 2. Calculate the starting point (e.g., 20 days ago)
-	startTime := time.Now().AddDate(0, 0, -daysBack).UnixMilli()
+	startTime := time.Now().Add(time.Duration(-hoursBack) * time.Hour).UnixMilli()
 
 	// 3. Loop in 7-day (604800000 ms) chunks
 	// We use slightly less (6 days) to be safe and avoid edge case overlaps

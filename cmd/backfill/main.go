@@ -8,15 +8,37 @@ import (
 	"vector-quant-monitor/internal/db"
 	"vector-quant-monitor/util"
 
+	"github.com/robfig/cron/v3"
+
 	"log/slog"
 )
 
 const (
-	LookBackDays = 1
+	hoursBack = 24
 )
 
 func main() {
+	c := cron.New()
 	log := util.NewLogger(slog.LevelDebug.String(), "backfill_position_history")
+
+	// "0 0 * * * *" means every hour at the 0 minute, 0 second mark
+	_, err := c.AddFunc("@hourly", func() {
+		runJob(log)
+	})
+	if err != nil {
+		log.Info(fmt.Sprintln("Error for setting schedule: ", err))
+	}
+
+	log.Info("Scheduler started. Waiting for next hourly run...")
+	c.Start()
+
+	// Keep the program alive forever
+	select {}
+
+}
+
+func runJob(log *slog.Logger) {
+
 	log.Info("Backfill Position History started")
 	config := config.LoadConfig()
 
@@ -39,7 +61,7 @@ func main() {
 		log,
 	)
 
-	history := backfill.GetPositionHistory(db, LookBackDays)
+	history := backfill.GetPositionHistory(db, hoursBack)
 	log.Info(fmt.Sprintln("history: ", history))
 
 	for _, item := range history {

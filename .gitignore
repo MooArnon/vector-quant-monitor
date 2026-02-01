@@ -34,3 +34,6 @@ go.work.sum
 set_env_dev.sh
 set_env_prod.sh
 .DS_Store
+
+dev.env
+prod.env

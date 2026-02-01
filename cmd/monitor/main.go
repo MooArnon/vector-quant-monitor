@@ -3,6 +3,7 @@ package main
 import (
 	"vector-quant-monitor/internal/config"
 	"vector-quant-monitor/internal/monitor"
+	"vector-quant-monitor/internal/vector"
 	"vector-quant-monitor/util"
 
 	"log/slog"
@@ -27,6 +28,16 @@ func main() {
 			config.Binance.ApiSecret,
 			log,
 		)
+	}
+	if monitorTag == "naive_check" {
+		log.Info("Monitor Tag: " + monitorTag)
+		err := vector.StartNaivePredictionCheck(
+			log,
+			21,
+		)
+		if err != nil {
+			log.Error("Error in naive prediction check: " + err.Error())
+		}
 	}
 
 	log.Info("Monitor stopped")
