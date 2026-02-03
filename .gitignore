@@ -37,3 +37,5 @@ set_env_prod.sh
 
 dev.env
 prod.env
+
+trading_optimization_report.pdf

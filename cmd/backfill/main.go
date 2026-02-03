@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	hoursBack = 2
+	hoursBack = 3
 )
 
 func main() {
